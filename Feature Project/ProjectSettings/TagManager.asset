@@ -8,6 +8,9 @@ TagManager:
   - Bullet
   - Laser
   - MegaBlaster
+  - Enemy
+  - BigEnemy
+  - BigRocket
   layers:
   - Default
   - TransparentFX

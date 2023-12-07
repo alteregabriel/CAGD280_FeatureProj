@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class playerMovement : MonoBehaviour
 {
-    //public float jump_force;
+    // Main arsenal
     private Rigidbody rigid_body;
     public float jumpVelocity;
     public float speed;
@@ -15,6 +15,10 @@ public class playerMovement : MonoBehaviour
     private Vector3 startPos;
     public float stunTimer;
 
+    // For player damage and respawn if in contact with enemy, as well as temp invincibility frame
+    public bool is_invincible = false;
+    public int health;
+
     void Start()
     {
         rigid_body = GetComponent<Rigidbody>();
@@ -22,6 +26,7 @@ public class playerMovement : MonoBehaviour
         startPos = transform.position;
     }
 
+    //What happens when a specific thing touches the player
     private void OnTriggerEnter(Collider other)
     {
         // If Mega Man grabs the big bullets upgrade:
@@ -30,6 +35,51 @@ public class playerMovement : MonoBehaviour
             GetComponentInChildren<MegaBlaster>().ChangeBullet();
             other.gameObject.SetActive(false);
         }
+
+        //If Mega Man collides with a Met or bigger enemy, this triggers the Hurt function
+        if (is_invincible == false)
+        {
+            if (other.tag == "Enemy")
+            {
+                Hurt(15);
+            }
+            if (other.tag == "BigEnemy")
+            {
+                Hurt(65);
+            }
+        }
+    }
+
+    // This will make Mega Man lose health and be temporarily invincible
+    private void Hurt(int damage)
+    {
+        health -= damage;
+        transform.position = startPos;
+        StartCoroutine(Blink());
+        // Update text for amount of health
+        // If the player's out of health, then they die
+    }
+
+    // The temporary invinibility frames will trigger once the player dies, causing them to visibly to blink
+    private IEnumerator Blink()
+    {
+        is_invincible = true;
+        for (int index = 0; index < 30; index++)
+        {
+            if (index % 2 == 0)
+            {
+                GetComponent<MeshRenderer>().enabled = false;
+                MegaBlaster.GetComponent<MeshRenderer>().enabled = false;
+            }
+            else
+            {
+                GetComponent<MeshRenderer>().enabled = true;
+                MegaBlaster.GetComponent<MeshRenderer>().enabled = true;
+            }
+            yield return new WaitForSeconds(.2f);
+        }
+        GetComponent<MeshRenderer>().enabled = true;
+        is_invincible = false;
     }
 
     void FixedUpdate()
@@ -70,26 +120,17 @@ public class playerMovement : MonoBehaviour
         {
             add_position += Vector3.left * Time.deltaTime * speed;
             // This will allow the mega blaster to rotate left with every "A" press.
-            transform.Find("MegaBlaster").rotation = Quaternion.Euler(0, 180, 0);
-            transform.Find("MegaBlaster").GetComponentInChildren<MegaBlaster>().goingLeft = true;
+            transform.Find("AllBody").rotation = Quaternion.Euler(0, 180, 0);
+            transform.Find("AllBody").Find("MegaBlaster").GetComponentInChildren<MegaBlaster>().goingLeft = true;
         }
         if (Input.GetKey("d"))
         {
             add_position += Vector3.right * Time.deltaTime * speed;
             // This will allow the mega blaster to rotate right with every "D" press.
-            transform.Find("MegaBlaster").rotation = Quaternion.Euler(0, 0, 0);
-            transform.Find("MegaBlaster").GetComponentInChildren<MegaBlaster>().goingLeft = false;
+            transform.Find("AllBody").rotation = Quaternion.Euler(0, 0, 0);
+            transform.Find("AllBody").Find("MegaBlaster").GetComponentInChildren<MegaBlaster>().goingLeft = false;
         }
         // Then apply the add_position code to the player model
         GetComponent<Transform>().position += add_position;
-    }
-
-    private void Awake()
-    {
-        if (GameObject.FindGameObjectsWithTag(this.tag).Length != 1)
-        {
-            Destroy(this.gameObject);
-        }
-
     }
 }

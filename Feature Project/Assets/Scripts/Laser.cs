@@ -30,22 +30,10 @@ public class Laser : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-        //If regular blue door...
-        if (other.tag == "Door")
+        // If Mega Man shoots a wall with a laser beam, this will destroy laser beam on impact
+        if (other.tag == "Wall")
         {
-            //...Then destroy blue door
-            Destroy(other.gameObject);
-        }
-
-        //If big red door...
-        if (other.tag == "BigDoor")
-        {
-            //If you have bigBullet...
-            if (bigBullet)
-            {
-                //...Then destroy red door
-                Destroy(other.gameObject);
-            }
+            Destroy(gameObject);
         }
     }
 
